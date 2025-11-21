@@ -51,7 +51,7 @@ public class Arrow : MonoBehaviour
         yield return new WaitForFixedUpdate();
         while (_inAir)
         {
-            Quaternion newRotation = Quaternion.LookRotation(_rigidBody.velocity, transform.up);
+            Quaternion newRotation = Quaternion.LookRotation(_rigidBody.linearVelocity, transform.up);
             transform.rotation = newRotation;
             yield return null;
         }
@@ -76,7 +76,7 @@ public class Arrow : MonoBehaviour
                 {
                     _rigidBody.interpolation = RigidbodyInterpolation.None;
                     transform.parent = hitInfo.transform;
-                    body.AddForce(_rigidBody.velocity, ForceMode.Impulse);
+                    body.AddForce(_rigidBody.linearVelocity, ForceMode.Impulse);
                 }
                 Stop();
                 audioSource.PlayOneShot(collisionSound); // Play collision sound

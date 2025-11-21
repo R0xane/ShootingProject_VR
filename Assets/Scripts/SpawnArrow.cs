@@ -1,5 +1,5 @@
 using System.Collections;
-using UnityEngine.XR.Interaction.Toolkit;
+
 using UnityEngine;
 
 public class SpawnArrow : MonoBehaviour
@@ -7,7 +7,7 @@ public class SpawnArrow : MonoBehaviour
     public GameObject arrow;
     public GameObject notch;
 
-    private XRGrabInteractable _bow;
+    private UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable _bow;
     private bool _arrowHasBeenNotched = false;
     private GameObject _currentArrow;
 
@@ -16,7 +16,7 @@ public class SpawnArrow : MonoBehaviour
 
     void Start()
     {
-        _bow = GetComponentInParent<XRGrabInteractable>();
+        _bow = GetComponentInParent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
         PullString.PullActionReleased += NotchIsEmpty;
         audioSource = gameObject.AddComponent<AudioSource>(); // Add AudioSource
     }

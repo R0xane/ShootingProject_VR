@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.OpenXR.Input;
 
-public class PullString : XRBaseInteractable
+public class PullString : UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable
 {
     public static event Action<float> PullActionReleased;
 
@@ -13,7 +13,7 @@ public class PullString : XRBaseInteractable
     public float pullAmount { get; private set; } = 0.0f;
 
     private LineRenderer _lineRenderer;
-    private IXRSelectInteractor _pullingInteractor = null;
+    private UnityEngine.XR.Interaction.Toolkit.Interactors.IXRSelectInteractor _pullingInteractor = null;
 
     // Variables to control the elastic behavior
     private float smoothPullVelocity = 0f; // Used by SmoothDamp to track velocity of pullAmount change
