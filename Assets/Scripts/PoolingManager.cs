@@ -25,23 +25,26 @@ public class PoolingManager : MonoBehaviour
     }
 
     // on récupère la balle dans le pool
-    public GameObject GetBullet()
+public GameObject GetBullet()
+{
+    GameObject bullet;
+
+    if (pool.Count > 0)
     {
-        GameObject bullet;
-
-        if (pool.Count > 0)
-        {
-            bullet = pool.Dequeue();
-        }
-        else
-        {
-            // si le pool est vide, on en crée une nouvelle
-            bullet = Instantiate(bulletPrefab);
-        }
-
-        bullet.SetActive(true);
-        return bullet;
+        bullet = pool.Dequeue();
     }
+    else
+    {
+        bullet = Instantiate(bulletPrefab);
+    }
+
+    // IMPORTANT : détacher d'abord, PUIS activer
+    bullet.transform.SetParent(null);
+    bullet.SetActive(true);
+
+    return bullet;
+}
+
 
     // remet la balle dans le pool
     public void ReturnBullet(GameObject bullet)
@@ -52,7 +55,7 @@ public class PoolingManager : MonoBehaviour
         Rigidbody rb = bullet.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.velocity = Vector3.zero;
+            rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
 
