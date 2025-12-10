@@ -38,15 +38,15 @@ public GameObject GetBullet()
         bullet = Instantiate(bulletPrefab);
     }
 
-    // IMPORTANT : détacher d'abord, PUIS activer
     bullet.transform.SetParent(null);
-    bullet.SetActive(true);
+    
+
 
     return bullet;
 }
 
 
-    // remet la balle dans le pool
+    // remet la balle dans le poolgemini
     public void ReturnBullet(GameObject bullet)
     {
         bullet.SetActive(false);
