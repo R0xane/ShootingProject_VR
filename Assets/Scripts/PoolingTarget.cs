@@ -6,7 +6,7 @@ public class TargetPool : MonoBehaviour
     public static TargetPool Instance;
 
     public Explosiontarget targetPrefab;
-    public int initialPoolSize = 6;
+    public int initialPoolSize = 6; // Assure-toi que ce nombre est au moins égal au nombre de positions (6)
 
     private Queue<Explosiontarget> pool = new Queue<Explosiontarget>();
 
@@ -21,39 +21,53 @@ public class TargetPool : MonoBehaviour
         new Vector3(9.711f, 1.14425f, -6.387f)
     };
 
-    // Quel point est occupé ?
     private bool[] occupied;
 
     private void Awake()
     {
         Instance = this;
         occupied = new bool[spawnPositions.Length];
+
+        // --- ICI : ON PRÉ-REMPLIT LE POOL ---
+        // On crée les objets avant même que le jeu commence vraiment
+        for (int i = 0; i < initialPoolSize; i++)
+        {
+            CreateNewTargetInPool();
+        }
     }
 
     private void Start()
     {
-        // On place une target sur chaque position au début
+        // À ce moment là, le pool est déjà plein, donc GetTarget() va juste piocher dedans
         for (int i = 0; i < spawnPositions.Length; i++)
         {
             SpawnAtIndex(i);
         }
     }
 
-    private Explosiontarget CreateNewTarget()
+    // Méthode utilitaire pour créer et ranger dans le pool
+    private Explosiontarget CreateNewTargetInPool()
     {
         Explosiontarget newTarget = Instantiate(targetPrefab);
         newTarget.gameObject.SetActive(false);
+        newTarget.transform.SetParent(transform); // On range l'objet sous le Pool pour garder la scène propre
         pool.Enqueue(newTarget);
         return newTarget;
     }
 
     private Explosiontarget GetTarget()
     {
+        // Sécurité : Si le pool est vide (ex: on a besoin de 7 cibles mais poolSize est à 6), on en crée une nouvelle
         if (pool.Count == 0)
-            CreateNewTarget();
+        {
+            return CreateNewTargetInPool();
+        }
 
         Explosiontarget t = pool.Dequeue();
-        t.ResetState();
+        
+        // IMPORTANT : Si tu as une méthode Reset() dans Explosiontarget, appelle-la ici
+        // t.ResetState(); 
+        
         return t;
     }
 
@@ -61,27 +75,27 @@ public class TargetPool : MonoBehaviour
     {
         Explosiontarget t = GetTarget();
 
-        t.positionIndex = index;                 // assignation de l'index
+        t.positionIndex = index;
         t.transform.position = spawnPositions[index];
         t.transform.rotation = Quaternion.identity;
+        
+        // Comme on a parenté au pool, c'est mieux de remettre null si la cible doit bouger librement, 
+        // sinon tu peux laisser transform.SetParent(transform) si elles sont statiques.
+        // t.transform.SetParent(null); 
 
         occupied[index] = true;
-
         t.gameObject.SetActive(true);
     }
 
-    // Quand la cible est détruite
     public void ReturnTarget(Explosiontarget target)
     {
         int index = target.positionIndex;
-
-        // On marque cet emplacement comme libre
         occupied[index] = false;
 
         target.gameObject.SetActive(false);
+        target.transform.SetParent(transform); // On la range à nouveau
         pool.Enqueue(target);
 
-        // Respawn après un délai → AU MÊME ENDROIT
         StartCoroutine(RespawnAfterDelay(index));
     }
 
@@ -89,7 +103,6 @@ public class TargetPool : MonoBehaviour
     {
         yield return new WaitForSeconds(1.5f);
 
-        // Respawn seulement si la position est toujours vide
         if (!occupied[index])
         {
             SpawnAtIndex(index);

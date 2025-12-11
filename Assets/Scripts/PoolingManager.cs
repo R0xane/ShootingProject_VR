@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PoolingManager : MonoBehaviour
 {
-    public static PoolingManager Instance;
+    // PLUS DE STATIC INSTANCE ICI !
 
     public GameObject bulletPrefab;
     public int initialPoolSize = 20;
@@ -12,46 +12,51 @@ public class PoolingManager : MonoBehaviour
 
     private void Awake()
     {
-        Instance = this;
-
-        // Création initiale du pool
         for (int i = 0; i < initialPoolSize; i++)
         {
-            GameObject obj = Instantiate(bulletPrefab);
-            obj.SetActive(false);
-            obj.transform.SetParent(transform);
-            pool.Enqueue(obj);
+            CreateNewBullet();
         }
     }
 
-    // on récupère la balle dans le pool
-public GameObject GetBullet()
-{
-    GameObject bullet;
-
-    if (pool.Count > 0)
+    private GameObject CreateNewBullet()
     {
-        bullet = pool.Dequeue();
+        GameObject obj = Instantiate(bulletPrefab);
+        
+        // C'EST ICI LA CLÉ : On dit à la balle "Je suis ton manager"
+        Bullets bulletScript = obj.GetComponent<Bullets>();
+        if (bulletScript != null)
+        {
+            bulletScript.Initialize(this);
+        }
+
+        obj.SetActive(false);
+        obj.transform.SetParent(transform);
+        pool.Enqueue(obj);
+        return obj;
     }
-    else
+
+    public GameObject GetBullet()
     {
-        bullet = Instantiate(bulletPrefab);
+        GameObject bullet;
+
+        if (pool.Count > 0)
+        {
+            bullet = pool.Dequeue();
+        }
+        else
+        {
+            bullet = CreateNewBullet();
+        }
+
+        bullet.transform.SetParent(null);
+        bullet.SetActive(false); // On laisse le FireBullet l'activer
+        return bullet;
     }
 
-    bullet.transform.SetParent(null);
-    
-
-
-    return bullet;
-}
-
-
-    // remet la balle dans le poolgemini
     public void ReturnBullet(GameObject bullet)
     {
         bullet.SetActive(false);
-
-        // Réinitialisation physique
+        
         Rigidbody rb = bullet.GetComponent<Rigidbody>();
         if (rb != null)
         {
