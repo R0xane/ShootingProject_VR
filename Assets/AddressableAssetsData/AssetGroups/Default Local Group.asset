@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_GUID: 560c3e6efd21ea24a9f9fa7958f990f8
+  m_SerializeEntries:
+  - m_GUID: 0e18c8fc01911d045b5b07bb54496a79
+    m_Address: TargetAiminig.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Quest
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3e1b4bacdfe4c904da7e0add980229e5
+    m_Address: Gun
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PCVR
+    - Quest
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4fc3e874ded997d4199a3204c9a7dc9e
+    m_Address: Explosions
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Quest
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 617cc89eb7633604baa23294550000b3
+    m_Address: MuzzleFlash
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PCVR
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7fc09728378026f4997bd1a4f894dec2
+    m_Address: MuzzleFlash
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Quest
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e7ae74d5d2ab3fb45811636a46c5e6c8
+    m_Address: TargetAiming
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PCVR
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f8423ad47227c1d4b98b67b68093d5de
+    m_Address: Explosion
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PCVR
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 8b9ffec42a6dcff4ab2b4ea2b64ff76d, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 657687dbfd043f146bfae5db86a974d5, type: 2}
+    - {fileID: 11400000, guid: 40c5278ff2b96c1468115138d03a3e11, type: 2}

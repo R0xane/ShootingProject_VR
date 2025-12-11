@@ -1,16 +1,18 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets; 
+using UnityEngine.ResourceManagement.AsyncOperations; 
 
 public class TargetPool : MonoBehaviour
 {
     public static TargetPool Instance;
 
-    public Explosiontarget targetPrefab;
-    public int initialPoolSize = 6; // Assure-toi que ce nombre est au moins égal au nombre de positions (6)
+    private GameObject targetPrefab; 
+    
+    public int initialPoolSize = 6; 
 
     private Queue<Explosiontarget> pool = new Queue<Explosiontarget>();
 
-    // Positions fixes
     private Vector3[] spawnPositions = new Vector3[]
     {
         new Vector3(6.455f, 1.14425f, -6.387f),
@@ -27,62 +29,108 @@ public class TargetPool : MonoBehaviour
     {
         Instance = this;
         occupied = new bool[spawnPositions.Length];
-
-        // --- ICI : ON PRÉ-REMPLIT LE POOL ---
-        // On crée les objets avant même que le jeu commence vraiment
-        for (int i = 0; i < initialPoolSize; i++)
-        {
-            CreateNewTargetInPool();
-        }
     }
 
     private void Start()
     {
-        // À ce moment là, le pool est déjà plein, donc GetTarget() va juste piocher dedans
+        LoadPlatformAddressable();
+    }
+
+    // On garde la fonction accessible tout le temps
+    private void LoadPlatformAddressable()
+    {
+        string labelToLoad = "";
+
+        
+        #if UNITY_ANDROID
+            labelToLoad = "Quest"; 
+            Debug.Log("Compilation Android : Chargement Quest");
+        #else
+            labelToLoad = "PCVR"; 
+            Debug.Log("Compilation PC/Editor : Chargement PCVR");
+        #endif
+        
+        // ----------------------------------------------------
+
+        Addressables.LoadAssetsAsync<GameObject>(labelToLoad, (obj) =>
+        {
+            if (obj.name.Contains("Target")) 
+            {
+                targetPrefab = obj;
+                Debug.Log($"Target trouvée : {obj.name}");
+            }
+        }).Completed += OnAssetsLoaded;
+    }
+
+    private void OnAssetsLoaded(AsyncOperationHandle<IList<GameObject>> handle)
+    {
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            if (targetPrefab != null)
+            {
+                InitPool();
+            }
+            else
+            {
+                Debug.LogError("Addressables chargés mais aucun objet 'Target' trouvé !");
+            }
+        }
+        else
+        {
+            Debug.LogError("Erreur lors du chargement des Addressables.");
+        }
+    }
+
+    private void InitPool()
+    {
+        for (int i = 0; i < initialPoolSize; i++)
+        {
+            CreateNewTargetInPool();
+        }
+
         for (int i = 0; i < spawnPositions.Length; i++)
         {
             SpawnAtIndex(i);
         }
     }
 
-    // Méthode utilitaire pour créer et ranger dans le pool
     private Explosiontarget CreateNewTargetInPool()
     {
-        Explosiontarget newTarget = Instantiate(targetPrefab);
-        newTarget.gameObject.SetActive(false);
-        newTarget.transform.SetParent(transform); // On range l'objet sous le Pool pour garder la scène propre
+        if (targetPrefab == null) return null;
+
+        GameObject obj = Instantiate(targetPrefab);
+        
+        obj.SetActive(false);
+        obj.transform.SetParent(transform); 
+
+        Explosiontarget newTarget = obj.GetComponent<Explosiontarget>();
+
+        if (newTarget == null)
+        {
+            Debug.LogError("Le prefab chargé n'a pas le script 'Explosiontarget' !");
+            Destroy(obj); 
+            return null;
+        }
+
         pool.Enqueue(newTarget);
         return newTarget;
     }
 
     private Explosiontarget GetTarget()
     {
-        // Sécurité : Si le pool est vide (ex: on a besoin de 7 cibles mais poolSize est à 6), on en crée une nouvelle
-        if (pool.Count == 0)
-        {
-            return CreateNewTargetInPool();
-        }
-
-        Explosiontarget t = pool.Dequeue();
-        
-        // IMPORTANT : Si tu as une méthode Reset() dans Explosiontarget, appelle-la ici
-        // t.ResetState(); 
-        
-        return t;
+        if (pool.Count == 0) return CreateNewTargetInPool();
+        return pool.Dequeue();
     }
 
     private void SpawnAtIndex(int index)
     {
         Explosiontarget t = GetTarget();
+        if (t == null) return; 
 
         t.positionIndex = index;
         t.transform.position = spawnPositions[index];
         t.transform.rotation = Quaternion.identity;
         
-        // Comme on a parenté au pool, c'est mieux de remettre null si la cible doit bouger librement, 
-        // sinon tu peux laisser transform.SetParent(transform) si elles sont statiques.
-        // t.transform.SetParent(null); 
-
         occupied[index] = true;
         t.gameObject.SetActive(true);
     }
@@ -93,7 +141,7 @@ public class TargetPool : MonoBehaviour
         occupied[index] = false;
 
         target.gameObject.SetActive(false);
-        target.transform.SetParent(transform); // On la range à nouveau
+        target.transform.SetParent(transform); 
         pool.Enqueue(target);
 
         StartCoroutine(RespawnAfterDelay(index));
@@ -102,10 +150,6 @@ public class TargetPool : MonoBehaviour
     private System.Collections.IEnumerator RespawnAfterDelay(int index)
     {
         yield return new WaitForSeconds(1.5f);
-
-        if (!occupied[index])
-        {
-            SpawnAtIndex(index);
-        }
+        if (!occupied[index]) SpawnAtIndex(index);
     }
 }

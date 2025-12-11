@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PoolingManager : MonoBehaviour
 {
-    // PLUS DE STATIC INSTANCE ICI !
+
 
     public GameObject bulletPrefab;
     public int initialPoolSize = 20;

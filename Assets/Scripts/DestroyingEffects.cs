@@ -1,5 +1,6 @@
 using UnityEngine;
 
+
 public class DestroyingEffects : MonoBehaviour
 {
     // Public variable to set the time in seconds before the object is destroyed.
@@ -9,8 +10,7 @@ public class DestroyingEffects : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        // The static Destroy method is called to destroy an object.
-        // The second parameter is the delay (in seconds) before the object is destroyed.
+    
         Destroy(gameObject, lifetime);
     }
 
