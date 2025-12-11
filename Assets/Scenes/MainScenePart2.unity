@@ -17645,6 +17645,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1276897033}
     - target: {fileID: 2553411413493001457, guid: 3e1b4bacdfe4c904da7e0add980229e5, type: 3}
+      propertyPath: firePoint
+      value: 
+      objectReference: {fileID: 2081161805}
+    - target: {fileID: 2553411413493001457, guid: 3e1b4bacdfe4c904da7e0add980229e5, type: 3}
       propertyPath: muzzleFlash
       value: 
       objectReference: {fileID: 2081161804}
@@ -17713,6 +17717,11 @@ Light:
 --- !u!198 &2081161804 stripped
 ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 8307299554854230720, guid: 3e1b4bacdfe4c904da7e0add980229e5, type: 3}
+  m_PrefabInstance: {fileID: 2081161802}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2081161805 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5910772864758850420, guid: 3e1b4bacdfe4c904da7e0add980229e5, type: 3}
   m_PrefabInstance: {fileID: 2081161802}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2102000379
