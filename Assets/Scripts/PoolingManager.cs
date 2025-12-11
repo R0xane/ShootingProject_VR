@@ -22,7 +22,6 @@ public class PoolingManager : MonoBehaviour
     {
         GameObject obj = Instantiate(bulletPrefab);
         
-        // C'EST ICI LA CLÉ : On dit à la balle "Je suis ton manager"
         Bullets bulletScript = obj.GetComponent<Bullets>();
         if (bulletScript != null)
         {
@@ -49,7 +48,7 @@ public class PoolingManager : MonoBehaviour
         }
 
         bullet.transform.SetParent(null);
-        bullet.SetActive(false); // On laisse le FireBullet l'activer
+        bullet.SetActive(false); 
         return bullet;
     }
 
