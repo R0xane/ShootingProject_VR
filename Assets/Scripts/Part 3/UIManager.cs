@@ -9,9 +9,9 @@ public class UIManager : MonoBehaviour
     private GamePlayManager gamePlayManager;
     public TextMeshProUGUI scoreText;
 
-    private float refreshInterval = 0.2f;
+    private float refreshInterval = 0.5f;
     private Coroutine scoreRoutine;
-    
+
     void Start()
     {
         gamePlayManager = GameObject.Find("GameManager").GetComponent<GamePlayManager>();
