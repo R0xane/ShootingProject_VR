@@ -13,6 +13,10 @@ public class TargetPool : MonoBehaviour
 
     private Queue<Explosiontarget> pool = new Queue<Explosiontarget>();
 
+    public bool IsReady { get; private set; }
+
+    public GamePlayManager gameplay;
+
     private Vector3[] spawnPositions = new Vector3[]
     {
         new Vector3(6.455f, 1.14425f, -6.387f),
@@ -29,6 +33,7 @@ public class TargetPool : MonoBehaviour
     {
         Instance = this;
         occupied = new bool[spawnPositions.Length];
+        gameplay = GameObject.Find("GameManager").GetComponent<GamePlayManager>();
     }
 
     private void Start()
@@ -36,7 +41,6 @@ public class TargetPool : MonoBehaviour
         LoadPlatformAddressable();
     }
 
-    // On garde la fonction accessible tout le temps
     private void LoadPlatformAddressable()
     {
         string labelToLoad = "";
@@ -50,7 +54,6 @@ public class TargetPool : MonoBehaviour
             Debug.Log("Compilation PC/Editor : Chargement PCVR");
         #endif
         
-        // ----------------------------------------------------
 
         Addressables.LoadAssetsAsync<GameObject>(labelToLoad, (obj) =>
         {
@@ -84,14 +87,9 @@ public class TargetPool : MonoBehaviour
     private void InitPool()
     {
         for (int i = 0; i < initialPoolSize; i++)
-        {
             CreateNewTargetInPool();
-        }
 
-        for (int i = 0; i < spawnPositions.Length; i++)
-        {
-            SpawnAtIndex(i);
-        }
+        IsReady = true; 
     }
 
     private Explosiontarget CreateNewTargetInPool()
@@ -141,15 +139,29 @@ public class TargetPool : MonoBehaviour
         occupied[index] = false;
 
         target.gameObject.SetActive(false);
-        target.transform.SetParent(transform); 
+        target.transform.SetParent(transform);
         pool.Enqueue(target);
 
-        StartCoroutine(RespawnAfterDelay(index));
+        if (gameplay != null) gameplay.TargetDespawned();
     }
 
-    private System.Collections.IEnumerator RespawnAfterDelay(int index)
+
+    public bool TrySpawnTarget()
     {
-        yield return new WaitForSeconds(1.5f);
-        if (!occupied[index]) SpawnAtIndex(index);
+        int freeIndex = -1;
+        for (int i = 0; i < occupied.Length; i++)
+        {
+            if (!occupied[i])
+            {
+                freeIndex = i;
+                break;
+            }
+        }
+
+        if (freeIndex == -1) return false; 
+
+        SpawnAtIndex(freeIndex);
+        return true;
     }
+
 }

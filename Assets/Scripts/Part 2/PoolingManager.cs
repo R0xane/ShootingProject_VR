@@ -1,14 +1,22 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 
 public class PoolingManager : MonoBehaviour
 {
 
-
+    [Header ("Bullet Pooling Settings")]
     public GameObject bulletPrefab;
     public int initialPoolSize = 20;
 
+    [Header ("Cleanup Settings")]
+    public Transform referencePoint;
+    public float cleanupDistance = 50f;
+    public float cleanupInterval = 0.1f;
+
     private Queue<GameObject> pool = new Queue<GameObject>();
+
+    private List<GameObject> activeBullets = new List<GameObject>();
 
     private void Awake()
     {
@@ -16,6 +24,14 @@ public class PoolingManager : MonoBehaviour
         {
             CreateNewBullet();
         }
+    }
+
+    public void Start(){
+        if (referencePoint == null)
+        {
+            referencePoint = transform;
+        }
+        StartCoroutine(CleanupRoutine());
     }
 
     private GameObject CreateNewBullet()
@@ -48,7 +64,7 @@ public class PoolingManager : MonoBehaviour
         }
 
         bullet.transform.SetParent(null);
-        bullet.SetActive(false); 
+        activeBullets.Add(bullet);
         return bullet;
     }
 
@@ -64,6 +80,36 @@ public class PoolingManager : MonoBehaviour
         }
 
         bullet.transform.SetParent(transform);
+        activeBullets.Remove(bullet);
         pool.Enqueue(bullet);
+    }
+
+    private IEnumerator CleanupRoutine()
+    {
+        WaitForSeconds wait = new WaitForSeconds(cleanupInterval);
+
+        while (true)
+        {
+            for (int i = activeBullets.Count - 1; i >= 0; i--)
+            {
+                GameObject ab = activeBullets[i];
+
+                if (ab == null)
+                {
+                    activeBullets.RemoveAt(i);
+                    continue;
+                }
+
+                float dist = Vector3.Distance(referencePoint.position, ab.transform.position);
+                if (dist > cleanupDistance)
+                {
+                    ReturnBullet(ab);
+                    Debug.Log($"Clean: {ab.name} id={ab.GetInstanceID()} dist={dist}");
+
+                }
+            }
+
+            yield return wait;
+        }
     }
 }

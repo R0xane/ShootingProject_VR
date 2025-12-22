@@ -8,9 +8,13 @@ public class Explosiontarget : MonoBehaviour
 
     public int positionIndex;
 
+    private GamePlayManager gamePlayManager;
+
     public void Start()
     {
         LoadAddressableEffect();
+        gamePlayManager = GameObject.Find("GameManager").GetComponent<GamePlayManager>();
+
     }
 
     private void LoadAddressableEffect()
@@ -43,6 +47,8 @@ public class Explosiontarget : MonoBehaviour
             }
 
             TargetPool.Instance.ReturnTarget(this);
+            gamePlayManager.AddScore(1);
+
         }
     }
 }
