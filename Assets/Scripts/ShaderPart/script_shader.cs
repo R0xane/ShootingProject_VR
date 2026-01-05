@@ -63,7 +63,7 @@ public class script_shader : MonoBehaviour
         float gs = (grabTarget > grabValue) ? grabInSpeed : grabOutSpeed;
 
         hoverValue = Mathf.MoveTowards(hoverValue, effectiveHoverTarget, hs * Time.deltaTime);
-        grabValue  = Mathf.MoveTowards(grabValue,  grabTarget,          gs * Time.deltaTime);
+        grabValue  = Mathf.MoveTowards(grabValue,  grabTarget, gs * Time.deltaTime);
 
         ApplyToAllRenderers(hoverValue, grabValue);
     }
