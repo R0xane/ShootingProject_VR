@@ -1580,6 +1580,29 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4000013974182346, guid: a4ea7ad660a6e4241aff4002d350fe80, type: 3}
   m_PrefabInstance: {fileID: 438847387}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &439796014 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3398446945417049502, guid: 3e1b4bacdfe4c904da7e0add980229e5, type: 3}
+  m_PrefabInstance: {fileID: 2081161802}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &439796022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 439796014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1336992d809a504fb41bbbf91cf07d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetRenderers:
+  - {fileID: 2081161807}
+  hoverInSpeed: 10
+  hoverOutSpeed: 12
+  grabInSpeed: 14
+  grabOutSpeed: 16
 --- !u!1001 &442009649
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5063,7 +5086,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1201983740
 Transform:
   m_ObjectHideFlags: 0
@@ -7454,7 +7477,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1952777561
 Transform:
   m_ObjectHideFlags: 0
@@ -8306,6 +8329,14 @@ PrefabInstance:
       propertyPath: bulletPool
       value: 
       objectReference: {fileID: 1276897033}
+    - target: {fileID: 2083089892183924224, guid: 3e1b4bacdfe4c904da7e0add980229e5, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2083089892183924224, guid: 3e1b4bacdfe4c904da7e0add980229e5, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 77dc4e9322891a443aeafaff5b6cdafc, type: 2}
     - target: {fileID: 2553411413493001457, guid: 3e1b4bacdfe4c904da7e0add980229e5, type: 3}
       propertyPath: firePoint
       value: 
@@ -8369,7 +8400,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3398446945417049502, guid: 3e1b4bacdfe4c904da7e0add980229e5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 439796022}
   m_SourcePrefab: {fileID: 100100000, guid: 3e1b4bacdfe4c904da7e0add980229e5, type: 3}
 --- !u!108 &2081161803 stripped
 Light:
@@ -8384,6 +8418,11 @@ ParticleSystem:
 --- !u!4 &2081161805 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5910772864758850420, guid: 3e1b4bacdfe4c904da7e0add980229e5, type: 3}
+  m_PrefabInstance: {fileID: 2081161802}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &2081161807 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2083089892183924224, guid: 3e1b4bacdfe4c904da7e0add980229e5, type: 3}
   m_PrefabInstance: {fileID: 2081161802}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2097044938
