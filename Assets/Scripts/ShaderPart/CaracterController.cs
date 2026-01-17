@@ -16,6 +16,16 @@ public class CaracterController : MonoBehaviour
     public string speedParam = "Speed";
     public float animDampTime = 0.10f; 
 
+    public string equippedParam = "IsEquipped";
+    public string equipTrigger = "Equip";
+
+    private bool isEquipped;
+
+    [SerializeField] float equipCooldown = 0.15f;
+    private float nextEquipTime = 0f;
+
+
+
     private CharacterController controller;
     private float verticalVelocity;
 
@@ -29,6 +39,22 @@ public class CaracterController : MonoBehaviour
 
     void Update()
     {
+
+        // Toggle Equip avec E
+        if (Input.GetKeyDown(KeyCode.E) && animator != null && Time.time >= nextEquipTime)
+        {
+            Debug.Log("Toggle Equip");
+            nextEquipTime = Time.time + equipCooldown;
+
+            isEquipped = !isEquipped;
+
+            animator.ResetTrigger(equipTrigger);
+            animator.SetBool(equippedParam, isEquipped);
+
+            if (isEquipped)
+                animator.SetTrigger(equipTrigger);
+        }
+
         float x = 0f;
         float z = 0f;
 
