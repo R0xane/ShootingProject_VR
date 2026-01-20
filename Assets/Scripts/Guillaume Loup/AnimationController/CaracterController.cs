@@ -69,7 +69,6 @@ public class CaracterController : MonoBehaviour
             }
             else
             {
-                waitingSecondPressToEquip = false;
                 UnequipNow();
             }
         }
