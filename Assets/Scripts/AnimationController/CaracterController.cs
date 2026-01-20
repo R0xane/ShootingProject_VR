@@ -11,6 +11,9 @@ public class CaracterController : MonoBehaviour
     [Header("Gravity")]
     public float gravity = -9.81f;
 
+    [Header("View")]
+    public Transform cameraTransform; // Main Camera
+
     [Header("Animation")]
     public Animator animator;
     public string speedParam = "Speed";
@@ -23,12 +26,13 @@ public class CaracterController : MonoBehaviour
     private float nextEquipTime = 0f;
 
     [Header("Weapon")]
-    public Transform weaponSocket;    
-    public Transform weapon;          
+    public Transform weaponSocket;
+    public Transform weapon;
     public bool disableWeaponCollidersWhenEquipped = true;
 
-    public Transform holsterSocket;   
+    public Transform holsterSocket;
     private Transform weaponOriginalParent;
+
     private CharacterController controller;
     private float verticalVelocity;
 
@@ -37,13 +41,15 @@ public class CaracterController : MonoBehaviour
         controller = GetComponent<CharacterController>();
         if (animator == null) animator = GetComponentInChildren<Animator>();
 
+        if (cameraTransform == null && Camera.main != null)
+            cameraTransform = Camera.main.transform;
+
         if (weapon != null)
             weaponOriginalParent = weapon.parent;
     }
 
     void Update()
     {
-        // Toggle Equip avec E
         if (Input.GetKeyDown(KeyCode.E) && animator != null && Time.time >= nextEquipTime)
         {
             nextEquipTime = Time.time + equipCooldown;
@@ -53,12 +59,10 @@ public class CaracterController : MonoBehaviour
             animator.SetBool(equippedParam, isEquipped);
             if (isEquipped) animator.SetTrigger(equipTrigger);
 
-            // Physically move weapon to socket
             if (isEquipped) AttachWeaponToSocket();
             else DetachWeapon();
         }
 
-        // Movement
         float x = 0f;
         float z = 0f;
         if (Input.GetKey(KeyCode.A)) x -= 1f;
@@ -72,7 +76,25 @@ public class CaracterController : MonoBehaviour
         bool isRunning = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
         float currentSpeed = isRunning ? runSpeed : walkSpeed;
 
-        Vector3 moveDir = input;
+        Vector3 moveDir;
+        if (cameraTransform != null)
+        {
+            Vector3 camForward = cameraTransform.forward;
+            Vector3 camRight = cameraTransform.right;
+
+            camForward.y = 0f;
+            camRight.y = 0f;
+
+            camForward.Normalize();
+            camRight.Normalize();
+
+            moveDir = (camRight * input.x + camForward * input.z);
+        }
+        else
+        {
+            moveDir = input;
+        }
+        moveDir = Vector3.ClampMagnitude(moveDir, 1f);
 
         if (moveDir.sqrMagnitude > 0.0001f)
         {
@@ -80,6 +102,7 @@ public class CaracterController : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, turnSpeed * Time.deltaTime);
         }
 
+        // Gravity
         if (controller.isGrounded && verticalVelocity < 0f)
             verticalVelocity = -2f;
 
@@ -101,7 +124,6 @@ public class CaracterController : MonoBehaviour
     {
         if (weapon == null || weaponSocket == null) return;
 
-        // Parent weapon to socket and snap
         weapon.SetParent(weaponSocket, worldPositionStays: false);
         weapon.localPosition = Vector3.zero;
         weapon.localRotation = Quaternion.identity;
@@ -134,6 +156,8 @@ public class CaracterController : MonoBehaviour
 
     void SetWeaponCollidersEnabled(bool enabled)
     {
+        if (weapon == null) return;
+
         var cols = weapon.GetComponentsInChildren<Collider>(true);
         foreach (var c in cols) c.enabled = enabled;
 
