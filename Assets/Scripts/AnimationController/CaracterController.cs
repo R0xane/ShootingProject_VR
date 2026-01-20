@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 [RequireComponent(typeof(CharacterController))]
 public class CaracterController : MonoBehaviour
@@ -12,7 +13,7 @@ public class CaracterController : MonoBehaviour
     public float gravity = -9.81f;
 
     [Header("View")]
-    public Transform cameraTransform; // Main Camera
+    public Transform cameraTransform;
 
     [Header("Animation")]
     public Animator animator;
@@ -21,18 +22,22 @@ public class CaracterController : MonoBehaviour
     public string equippedParam = "IsEquipped";
     public string equipTrigger = "Equip";
 
-    private bool isEquipped;
-    [SerializeField] float equipCooldown = 0.15f;
-    private float nextEquipTime = 0f;
+    [Header("Rigging")]
+    public TwoBoneIKConstraint rightArmIK;
+    public TwoBoneIKConstraint leftArmIK;
+    public MultiAimConstraint chestAim;
+    [Range(0f, 1f)] public float chestAimWeight = 0.25f;
 
     [Header("Weapon")]
     public Transform weaponSocket;
     public Transform weapon;
     public bool disableWeaponCollidersWhenEquipped = true;
-
     public Transform holsterSocket;
-    private Transform weaponOriginalParent;
 
+    private bool isEquipped = false;
+    private bool armsIKEnabled = true;
+
+    private Transform weaponOriginalParent;
     private CharacterController controller;
     private float verticalVelocity;
 
@@ -46,21 +51,27 @@ public class CaracterController : MonoBehaviour
 
         if (weapon != null)
             weaponOriginalParent = weapon.parent;
+
+        SetChestAim(chestAimWeight);
+
+        SetArmsIK(1f);
+        armsIKEnabled = true;
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E) && animator != null && Time.time >= nextEquipTime)
+
+        if (Input.GetKeyDown(KeyCode.E) && animator != null)
         {
-            nextEquipTime = Time.time + equipCooldown;
-            isEquipped = !isEquipped;
-
-            animator.ResetTrigger(equipTrigger);
-            animator.SetBool(equippedParam, isEquipped);
-            if (isEquipped) animator.SetTrigger(equipTrigger);
-
-            if (isEquipped) AttachWeaponToSocket();
-            else DetachWeapon();
+            if (!isEquipped)
+            {
+                EquipNow();
+            }
+            else
+            {
+                waitingSecondPressToEquip = false;
+                UnequipNow();
+            }
         }
 
         float x = 0f;
@@ -70,8 +81,7 @@ public class CaracterController : MonoBehaviour
         if (Input.GetKey(KeyCode.W)) z += 1f;
         if (Input.GetKey(KeyCode.S)) z -= 1f;
 
-        Vector3 input = new Vector3(x, 0f, z);
-        input = Vector3.ClampMagnitude(input, 1f);
+        Vector3 input = Vector3.ClampMagnitude(new Vector3(x, 0f, z), 1f);
 
         bool isRunning = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
         float currentSpeed = isRunning ? runSpeed : walkSpeed;
@@ -79,33 +89,27 @@ public class CaracterController : MonoBehaviour
         Vector3 moveDir;
         if (cameraTransform != null)
         {
-            Vector3 camForward = cameraTransform.forward;
-            Vector3 camRight = cameraTransform.right;
-
-            camForward.y = 0f;
-            camRight.y = 0f;
-
-            camForward.Normalize();
-            camRight.Normalize();
-
+            Vector3 camForward = cameraTransform.forward; camForward.y = 0f; camForward.Normalize();
+            Vector3 camRight = cameraTransform.right;     camRight.y = 0f;   camRight.Normalize();
             moveDir = (camRight * input.x + camForward * input.z);
         }
-        else
-        {
-            moveDir = input;
-        }
+        else moveDir = input;
+
         moveDir = Vector3.ClampMagnitude(moveDir, 1f);
 
-        if (moveDir.sqrMagnitude > 0.0001f)
+        if (cameraTransform != null)
         {
-            Quaternion targetRot = Quaternion.LookRotation(moveDir, Vector3.up);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, turnSpeed * Time.deltaTime);
+            Vector3 forward = cameraTransform.forward;
+            forward.y = 0f;
+            if (forward.sqrMagnitude > 0.0001f)
+            {
+                forward.Normalize();
+                Quaternion targetRot = Quaternion.LookRotation(forward, Vector3.up);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, turnSpeed * Time.deltaTime);
+            }
         }
 
-        // Gravity
-        if (controller.isGrounded && verticalVelocity < 0f)
-            verticalVelocity = -2f;
-
+        if (controller.isGrounded && verticalVelocity < 0f) verticalVelocity = -2f;
         verticalVelocity += gravity * Time.deltaTime;
 
         Vector3 velocity = moveDir * currentSpeed;
@@ -120,17 +124,61 @@ public class CaracterController : MonoBehaviour
         }
     }
 
+    void EquipNow()
+    {
+        isEquipped = true;
+
+        animator.SetBool(equippedParam, true);
+        animator.ResetTrigger(equipTrigger);
+        animator.SetTrigger(equipTrigger);
+        animator.Update(0f);
+
+        AttachWeaponToSocket();
+
+        armsIKEnabled = !armsIKEnabled;
+        SetArmsIK(armsIKEnabled ? 1f : 0f);
+
+        SetChestAim(chestAimWeight);
+    }
+
+    void UnequipNow()
+    {
+        isEquipped = false;
+
+        animator.SetBool(equippedParam, false);
+        animator.ResetTrigger(equipTrigger);
+        animator.SetTrigger(equipTrigger);
+        animator.Update(0f);
+
+        DetachWeapon();
+
+        armsIKEnabled = !armsIKEnabled;
+        SetArmsIK(armsIKEnabled ? 1f : 0f);
+
+        SetChestAim(chestAimWeight);
+    }
+
+    void SetArmsIK(float w)
+    {
+        if (rightArmIK != null) rightArmIK.weight = w;
+        if (leftArmIK != null) leftArmIK.weight = w;
+    }
+
+    void SetChestAim(float w)
+    {
+        if (chestAim != null) chestAim.weight = w;
+    }
+
     void AttachWeaponToSocket()
     {
         if (weapon == null || weaponSocket == null) return;
 
-        weapon.SetParent(weaponSocket, worldPositionStays: false);
+        weapon.SetParent(weaponSocket, false);
         weapon.localPosition = Vector3.zero;
         weapon.localRotation = Quaternion.identity;
         weapon.localScale = Vector3.one;
 
-        if (disableWeaponCollidersWhenEquipped)
-            SetWeaponCollidersEnabled(false);
+        if (disableWeaponCollidersWhenEquipped) SetWeaponCollidersEnabled(false);
     }
 
     void DetachWeapon()
@@ -140,26 +188,22 @@ public class CaracterController : MonoBehaviour
         Transform targetParent = holsterSocket != null ? holsterSocket : weaponOriginalParent;
         if (targetParent != null)
         {
-            weapon.SetParent(targetParent, worldPositionStays: false);
+            weapon.SetParent(targetParent, false);
             weapon.localPosition = Vector3.zero;
             weapon.localRotation = Quaternion.identity;
             weapon.localScale = Vector3.one;
         }
-        else
-        {
-            weapon.SetParent(null);
-        }
+        else weapon.SetParent(null);
 
-        if (disableWeaponCollidersWhenEquipped)
-            SetWeaponCollidersEnabled(true);
+        if (disableWeaponCollidersWhenEquipped) SetWeaponCollidersEnabled(true);
     }
 
     void SetWeaponCollidersEnabled(bool enabled)
     {
         if (weapon == null) return;
 
-        var cols = weapon.GetComponentsInChildren<Collider>(true);
-        foreach (var c in cols) c.enabled = enabled;
+        foreach (var c in weapon.GetComponentsInChildren<Collider>(true))
+            c.enabled = enabled;
 
         var rb = weapon.GetComponentInChildren<Rigidbody>();
         if (rb != null) rb.isKinematic = !enabled;
